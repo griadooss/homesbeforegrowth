@@ -15,6 +15,13 @@
             text-align: center;
         }
         
+        /* Alternative email protection using CSS (uncomment if needed):
+        .email-protection {
+            direction: rtl;
+            unicode-bidi: bidi-override;
+        }
+        */
+        
         .hero-content h1 {
             font-size: 3rem;
             margin-bottom: 1rem;
@@ -279,8 +286,8 @@
                         <p style="margin-bottom: 1rem; color: #6b7280;">
                             For any questions about the financial structure or funding of this movement, please contact:
                         </p>
-                        <a href="mailto:treasurer@homesbeforegrowth.org" style="color: #3b82f6; text-decoration: none; font-weight: 600; font-size: 1.1rem;">
-                            📧 treasurer@homesbeforegrowth.org
+                        <a href="#" onclick="sendEmail()" style="color: #3b82f6; text-decoration: none; font-weight: 600; font-size: 1.1rem;">
+                            📧 <span id="email-display">[Click to reveal email]</span>
                         </a>
                     </div>
                 </div>
@@ -487,6 +494,25 @@
         function downloadReport(reportId) {
             // This would integrate with your API to generate/download the actual report
             alert('Report download functionality will be implemented when the admin system is deployed.');
+        }
+        
+        // Email protection function
+        function sendEmail() {
+            const emailParts = ['treasurer', '@', 'homesbeforegrowth', '.', 'org'];
+            const email = emailParts.join('');
+            const emailDisplay = document.getElementById('email-display');
+            
+            // Show the email address
+            emailDisplay.textContent = email;
+            
+            // Create mailto link and open email client
+            const mailtoLink = 'mailto:' + email + '?subject=HBG Financial Inquiry';
+            window.location.href = mailtoLink;
+            
+            // Optional: Add a small delay and then hide the email again
+            setTimeout(() => {
+                emailDisplay.textContent = '[Click to reveal email]';
+            }, 5000);
         }
     </script>
 </body>
