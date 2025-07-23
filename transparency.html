@@ -383,7 +383,7 @@
     <section class="contact-section">
         <div class="container">
             <h3>Questions About Our Finances?</h3>
-            <p>We're happy to answer any questions about our financial management. Contact us at <a href="mailto:treasurer@homesbeforegrowth.org" style="color: #60a5fa;">treasurer@homesbeforegrowth.org</a></p>
+            <p>We're happy to answer any questions about our financial management. Contact us at <a href="#" onclick="sendEmailFooter()" style="color: #60a5fa;"><span id="footer-email">[Click to reveal email]</span></a></p>
         </div>
     </section>
     
@@ -501,6 +501,25 @@
             const emailParts = ['treasurer', '@', 'homesbeforegrowth', '.', 'org'];
             const email = emailParts.join('');
             const emailDisplay = document.getElementById('email-display');
+            
+            // Show the email address
+            emailDisplay.textContent = email;
+            
+            // Create mailto link and open email client
+            const mailtoLink = 'mailto:' + email + '?subject=HBG Financial Inquiry';
+            window.location.href = mailtoLink;
+            
+            // Optional: Add a small delay and then hide the email again
+            setTimeout(() => {
+                emailDisplay.textContent = '[Click to reveal email]';
+            }, 5000);
+        }
+        
+        // Footer email protection function
+        function sendEmailFooter() {
+            const emailParts = ['treasurer', '@', 'homesbeforegrowth', '.', 'org'];
+            const email = emailParts.join('');
+            const emailDisplay = document.getElementById('footer-email');
             
             // Show the email address
             emailDisplay.textContent = email;
