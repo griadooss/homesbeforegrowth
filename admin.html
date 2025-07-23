@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Homes Before Growth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading-spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div>
+                <div class="mx-auto h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                    Admin Access
+                </h2>
+                <p class="mt-2 text-center text-sm text-gray-600">
+                    Homes Before Growth Member Dashboard
+                </p>
+            </div>
+            
+            <form id="loginForm" class="mt-8 space-y-6">
+                <div>
+                    <label for="password" class="sr-only">Admin Password</label>
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        required
+                        class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                        placeholder="Enter admin password"
+                    />
+                </div>
+
+                <div id="loginError" class="text-red-600 text-sm text-center hidden">
+                    Invalid password
+                </div>
+
+                <div>
+                    <button
+                        type="submit"
+                        id="loginButton"
+                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                        Sign in
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center">
+                <p class="text-xs text-gray-500">
+                    Contact your administrator for access credentials
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboardScreen" class="hidden">
+        <!-- Header -->
+        <div class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-6">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Member Dashboard</h1>
+                        <p class="text-gray-600">Homes Before Growth Movement</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">Last updated</p>
+                        <p class="text-sm font-medium text-gray-900" id="lastUpdated"></p>
+                        <button
+                            onclick="logout()"
+                            class="mt-2 text-sm text-red-600 hover:text-red-800"
+                        >
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" id="statsCards">
+                <!-- Stats will be populated here -->
+            </div>
+
+            <!-- Filters and Search -->
+            <div class="bg-white rounded-lg shadow p-6 mb-8">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1">
+                        <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
+                            Search Members
+                        </label>
+                        <input
+                            type="text"
+                            id="search"
+                            placeholder="Search by name, email, or postcode..."
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                    </div>
+                    <div class="sm:w-48">
+                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
+                            Filter by Status
+                        </label>
+                        <select
+                            id="status"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            <option value="all">All Members</option>
+                            <option value="ACTIVE">Active</option>
+                            <option value="INACTIVE">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Members Table -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        Members (<span id="memberCount">0</span>)
+                    </h3>
+                </div>
+                
+                <div id="membersTable">
+                    <!-- Table will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://hbg-budget-app-production.up.railway.app';
+        let allMembers = [];
+        let filteredMembers = [];
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const isAuthenticated = localStorage.getItem('admin-authenticated');
+            if (isAuthenticated) {
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        });
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            
+            if (password === 'hbg-admin-2024') {
+                localStorage.setItem('admin-authenticated', 'true');
+                showDashboard();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        });
+
+        function showLogin() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('dashboardScreen').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('dashboardScreen').classList.remove('hidden');
+            updateLastUpdated();
+            fetchMembers();
+            fetchStats();
+        }
+
+        function logout() {
+            localStorage.removeItem('admin-authenticated');
+            showLogin();
+        }
+
+        function updateLastUpdated() {
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleString('en-AU');
+        }
+
+        async function fetchMembers() {
+            try {
+                const response = await fetch(`${API_BASE}/api/members`);
+                if (!response.ok) throw new Error('Failed to fetch members');
+                const data = await response.json();
+                allMembers = data.members || [];
+                filteredMembers = [...allMembers];
+                renderMembers();
+                updateStats();
+            } catch (error) {
+                console.error('Error fetching members:', error);
+                showError('Failed to load members');
+            }
+        }
+
+        async function fetchStats() {
+            try {
+                const response = await fetch(`${API_BASE}/api/members/stats`);
+                if (!response.ok) throw new Error('Failed to fetch stats');
+                const data = await response.json();
+                renderStats(data);
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+            }
+        }
+
+        function renderStats(stats) {
+            const statsCards = document.getElementById('statsCards');
+            statsCards.innerHTML = `
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Total Members</p>
+                            <p class="text-2xl font-bold text-gray-900">${stats.totalMembers || allMembers.length}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-100 text-green-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Active Members</p>
+                            <p class="text-2xl font-bold text-gray-900">${stats.activeMembers || allMembers.filter(m => m.status === 'ACTIVE').length}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">This Month</p>
+                            <p class="text-2xl font-bold text-gray-900">${stats.thisMonthSignups || 0}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Newsletter Subscribers</p>
+                            <p class="text-2xl font-bold text-gray-900">${stats.newsletterSubscribers || allMembers.filter(m => m.newsletterOptIn).length}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateStats() {
+            const stats = {
+                totalMembers: allMembers.length,
+                activeMembers: allMembers.filter(m => m.status === 'ACTIVE').length,
+                thisMonthSignups: allMembers.filter(m => {
+                    const signupDate = new Date(m.signupDate);
+                    const now = new Date();
+                    return signupDate.getMonth() === now.getMonth() && signupDate.getFullYear() === now.getFullYear();
+                }).length,
+                newsletterSubscribers: allMembers.filter(m => m.newsletterOptIn).length
+            };
+            renderStats(stats);
+        }
+
+        function renderMembers() {
+            const tableContainer = document.getElementById('membersTable');
+            const memberCount = document.getElementById('memberCount');
+            
+            memberCount.textContent = filteredMembers.length;
+
+            if (filteredMembers.length === 0) {
+                tableContainer.innerHTML = `
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No members found</h3>
+                        <p class="mt-1 text-sm text-gray-500">Get started by promoting your signup form!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const formatDate = (dateString) => {
+                return new Date(dateString).toLocaleDateString('en-AU', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            };
+
+            const tableHTML = `
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Signup Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Newsletter</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${filteredMembers.map(member => `
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                                    <span class="text-sm font-medium text-blue-600">
+                                                        ${(member.firstName?.[0] || '')}${(member.lastName?.[0] || '')}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    ${member.firstName} ${member.lastName}
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    ID: ${member.id}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">${member.email}</div>
+                                        ${member.phone ? `<div class="text-sm text-gray-500">${member.phone}</div>` : ''}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">${member.postcode}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${member.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                            ${member.status || 'ACTIVE'}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        ${formatDate(member.signupDate)}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${member.newsletterOptIn ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                            ${member.newsletterOptIn ? 'Subscribed' : 'Unsubscribed'}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            tableContainer.innerHTML = tableHTML;
+        }
+
+        // Search and filter functionality
+        document.getElementById('search').addEventListener('input', function(e) {
+            filterMembers();
+        });
+
+        document.getElementById('status').addEventListener('change', function(e) {
+            filterMembers();
+        });
+
+        function filterMembers() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const filterStatus = document.getElementById('status').value;
+
+            filteredMembers = allMembers.filter(member => {
+                const matchesSearch = 
+                    (member.firstName?.toLowerCase().includes(searchTerm) || false) ||
+                    (member.lastName?.toLowerCase().includes(searchTerm) || false) ||
+                    (member.email?.toLowerCase().includes(searchTerm) || false) ||
+                    (member.postcode?.includes(searchTerm) || false);
+                
+                const matchesFilter = filterStatus === 'all' || member.status === filterStatus;
+                
+                return matchesSearch && matchesFilter;
+            });
+
+            renderMembers();
+        }
+
+        function showError(message) {
+            // You can implement a better error display
+            console.error(message);
+        }
+    </script>
+</body>
+</html> 
