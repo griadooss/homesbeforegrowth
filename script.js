@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
             };
             
             // Call the backend API
-            fetch('https://hbg-budget-app-7.onrender.com/api/members/signup', {
+            fetch('https://hbg-budget-app-production.up.railway.app/api/members/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
