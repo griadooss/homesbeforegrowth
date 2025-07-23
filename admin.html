@@ -87,12 +87,20 @@
                     <div class="text-right">
                         <p class="text-sm text-gray-500">Last updated</p>
                         <p class="text-sm font-medium text-gray-900" id="lastUpdated"></p>
-                        <button
-                            onclick="logout()"
-                            class="mt-2 text-sm text-red-600 hover:text-red-800"
-                        >
-                            Sign Out
-                        </button>
+                        <div class="flex space-x-2 mt-2">
+                            <button
+                                onclick="exportMembers()"
+                                class="text-sm text-green-600 hover:text-green-800"
+                            >
+                                Export CSV
+                            </button>
+                            <button
+                                onclick="logout()"
+                                class="text-sm text-red-600 hover:text-red-800"
+                            >
+                                Sign Out
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -340,6 +348,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Signup Date</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Newsletter</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -384,6 +393,25 @@
                                             ${member.newsletterOptIn ? 'Subscribed' : 'Unsubscribed'}
                                         </span>
                                     </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <button onclick="editMember('${member.id}')" class="text-blue-600 hover:text-blue-900">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                            </button>
+                                            <button onclick="toggleStatus('${member.id}', '${member.status || 'ACTIVE'}')" class="text-yellow-600 hover:text-yellow-900">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                            </button>
+                                            <button onclick="deleteMember('${member.id}', '${member.firstName} ${member.lastName}')" class="text-red-600 hover:text-red-900">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -425,6 +453,128 @@
         function showError(message) {
             // You can implement a better error display
             console.error(message);
+        }
+
+        // Member Management Functions
+        async function editMember(memberId) {
+            const member = allMembers.find(m => m.id === memberId);
+            if (!member) return;
+
+            const newFirstName = prompt('First Name:', member.firstName);
+            if (newFirstName === null) return;
+
+            const newLastName = prompt('Last Name:', member.lastName);
+            if (newLastName === null) return;
+
+            const newEmail = prompt('Email:', member.email);
+            if (newEmail === null) return;
+
+            const newPostcode = prompt('Postcode:', member.postcode);
+            if (newPostcode === null) return;
+
+            const newPhone = prompt('Phone (optional):', member.phone || '');
+            if (newPhone === null) return;
+
+            const newsletterOptIn = confirm('Subscribe to newsletter?');
+            if (newsletterOptIn === null) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/members/${memberId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        firstName: newFirstName,
+                        lastName: newLastName,
+                        email: newEmail,
+                        postcode: newPostcode,
+                        phone: newPhone || null,
+                        newsletterOptIn: newsletterOptIn
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Member updated successfully!');
+                    fetchMembers(); // Refresh the list
+                } else {
+                    alert('Failed to update member');
+                }
+            } catch (error) {
+                console.error('Error updating member:', error);
+                alert('Error updating member');
+            }
+        }
+
+        async function toggleStatus(memberId, currentStatus) {
+            const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+            const confirmMessage = `Are you sure you want to ${newStatus === 'ACTIVE' ? 'activate' : 'deactivate'} this member?`;
+            
+            if (!confirm(confirmMessage)) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/members/${memberId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        status: newStatus
+                    })
+                });
+
+                if (response.ok) {
+                    alert(`Member status updated to ${newStatus}!`);
+                    fetchMembers(); // Refresh the list
+                } else {
+                    alert('Failed to update member status');
+                }
+            } catch (error) {
+                console.error('Error updating member status:', error);
+                alert('Error updating member status');
+            }
+        }
+
+        async function deleteMember(memberId, memberName) {
+            const confirmMessage = `Are you sure you want to delete ${memberName}? This action cannot be undone.`;
+            
+            if (!confirm(confirmMessage)) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/members/${memberId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Member deleted successfully!');
+                    fetchMembers(); // Refresh the list
+                } else {
+                    alert('Failed to delete member');
+                }
+            } catch (error) {
+                console.error('Error deleting member:', error);
+                alert('Error deleting member');
+            }
+        }
+
+        // Bulk Actions
+        function exportMembers() {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "Name,Email,Postcode,Phone,Status,Newsletter,Signup Date\n"
+                + filteredMembers.map(member => 
+                    `"${member.firstName} ${member.lastName}","${member.email}","${member.postcode}","${member.phone || ''}","${member.status || 'ACTIVE'}","${member.newsletterOptIn ? 'Yes' : 'No'}","${new Date(member.signupDate).toLocaleDateString('en-AU')}"`
+                ).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `hbg-members-${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
