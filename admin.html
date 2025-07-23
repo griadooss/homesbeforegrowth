@@ -375,7 +375,7 @@
                                     </td>
                                     <td class="px-4 py-4 w-1/5">
                                         <div class="text-sm text-gray-900 truncate">${member.email}</div>
-                                        ${member.phone ? `<div class="text-xs text-gray-500 truncate">${member.phone}</div>` : ''}
+                                        ${member.phone ? `<div class="text-xs text-gray-500 truncate">📞 ${member.phone}</div>` : ''}
                                     </td>
                                     <td class="px-4 py-4 w-1/12 text-center">
                                         <div class="text-sm text-gray-900">${member.postcode}</div>
@@ -451,8 +451,33 @@
         }
 
         function showError(message) {
-            // You can implement a better error display
-            console.error(message);
+            // Create a non-blocking error notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #ef4444;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                z-index: 1001;
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                max-width: 300px;
+                word-wrap: break-word;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 5000);
         }
 
         function showSuccessMessage(message) {
@@ -605,7 +630,7 @@
                 const newsletterOptIn = document.getElementById('editNewsletter').checked;
                 
                 if (!newFirstName || !newLastName || !newEmail || !newPostcode) {
-                    alert('Please fill in all required fields (First Name, Last Name, Email, Postcode)');
+                    showError('Please fill in all required fields (First Name, Last Name, Email, Postcode)');
                     return;
                 }
                 
@@ -636,7 +661,7 @@
                     }
                 } catch (error) {
                     console.error('Error updating member:', error);
-                    alert('Error updating member');
+                    showError('Error updating member');
                 }
             };
 
@@ -660,7 +685,7 @@
                     alert('Member updated successfully!');
                     fetchMembers(); // Refresh the list
                 } else {
-                    alert('Failed to update member');
+                    showError('Failed to update member');
                 }
             } catch (error) {
                 console.error('Error updating member:', error);
@@ -689,12 +714,12 @@
                     showSuccessMessage(`Member status updated to ${newStatus}!`);
                     fetchMembers(); // Refresh the list
                 } else {
-                    alert('Failed to update member status');
+                    showError('Failed to update member status');
                 }
-            } catch (error) {
-                console.error('Error updating member status:', error);
-                alert('Error updating member status');
-            }
+                            } catch (error) {
+                    console.error('Error updating member status:', error);
+                    showError('Error updating member status');
+                }
         }
 
         async function deleteMember(memberId, memberName) {
@@ -714,12 +739,12 @@
                     showSuccessMessage('Member deleted successfully!');
                     fetchMembers(); // Refresh the list
                 } else {
-                    alert('Failed to delete member');
+                    showError('Failed to delete member');
                 }
-            } catch (error) {
-                console.error('Error deleting member:', error);
-                alert('Error deleting member');
-            }
+                            } catch (error) {
+                    console.error('Error deleting member:', error);
+                    showError('Error deleting member');
+                }
         }
 
         // Bulk Actions
