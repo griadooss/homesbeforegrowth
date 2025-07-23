@@ -213,6 +213,7 @@
                 if (!response.ok) throw new Error('Failed to fetch members');
                 const data = await response.json();
                 allMembers = data.members || [];
+                console.log('Fetched members:', allMembers); // Debug log
                 filteredMembers = [...allMembers];
                 renderMembers();
                 updateStats();
@@ -375,7 +376,7 @@
                                     </td>
                                     <td class="px-4 py-4 w-1/5">
                                         <div class="text-sm text-gray-900 truncate">${member.email}</div>
-                                        ${member.phone ? `<div class="text-xs text-gray-500 truncate">📞 ${member.phone}</div>` : ''}
+                                        ${member.phone ? `<div class="text-xs text-gray-500 truncate">📞 ${member.phone}</div>` : '<div class="text-xs text-gray-400">No phone</div>'}
                                     </td>
                                     <td class="px-4 py-4 w-1/12 text-center">
                                         <div class="text-sm text-gray-900">${member.postcode}</div>
