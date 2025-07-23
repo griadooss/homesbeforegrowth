@@ -455,6 +455,36 @@
             console.error(message);
         }
 
+        function showSuccessMessage(message) {
+            // Create a non-blocking success notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                z-index: 1001;
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                max-width: 300px;
+                word-wrap: break-word;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 3000);
+        }
+
         // Member Management Functions
         async function editMember(memberId) {
             const member = allMembers.find(m => m.id === memberId);
@@ -596,8 +626,10 @@
                     });
 
                     if (response.ok) {
-                        alert('Member updated successfully!');
+                        // Close modal first
                         document.body.removeChild(modal);
+                        // Show success message without blocking
+                        showSuccessMessage('Member updated successfully!');
                         fetchMembers(); // Refresh the list
                     } else {
                         alert('Failed to update member');
@@ -654,7 +686,7 @@
                 });
 
                 if (response.ok) {
-                    alert(`Member status updated to ${newStatus}!`);
+                    showSuccessMessage(`Member status updated to ${newStatus}!`);
                     fetchMembers(); // Refresh the list
                 } else {
                     alert('Failed to update member status');
@@ -679,7 +711,7 @@
                 });
 
                 if (response.ok) {
-                    alert('Member deleted successfully!');
+                    showSuccessMessage('Member deleted successfully!');
                     fetchMembers(); // Refresh the list
                 } else {
                     alert('Failed to delete member');
