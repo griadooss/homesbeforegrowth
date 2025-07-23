@@ -28,12 +28,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Get form data
             const formData = new FormData(this);
             const firstName = formData.get('firstName');
+            const lastName = formData.get('lastName');
             const email = formData.get('email');
             const postcode = formData.get('postcode');
             const newsletter = formData.get('newsletter');
             
             // Basic validation
-            if (!firstName || !email || !postcode) {
+            if (!firstName || !lastName || !email || !postcode) {
                 alert('Please fill in all required fields.');
                 return;
             }
@@ -62,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Prepare data for API
             const memberData = {
                 firstName: firstName,
-                lastName: '', // We'll use firstName for both since form only has firstName
+                lastName: lastName,
                 email: email,
                 postcode: postcode,
                 newsletterOptIn: newsletter === 'on'
