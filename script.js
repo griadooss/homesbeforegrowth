@@ -52,15 +52,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Simulate form submission (replace with actual backend integration)
+            // Real API call to backend
             const submitButton = this.querySelector('.submit-button');
             const originalText = submitButton.textContent;
             
             submitButton.textContent = 'Joining...';
             submitButton.disabled = true;
             
-            // Simulate API call
-            setTimeout(() => {
+            // Prepare data for API
+            const memberData = {
+                firstName: firstName,
+                lastName: '', // We'll use firstName for both since form only has firstName
+                email: email,
+                postcode: postcode,
+                newsletterOptIn: newsletter === 'on'
+            };
+            
+            // Call the backend API
+            fetch('https://hbg-budget-app-7.onrender.com/api/members/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(memberData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
                 // Show success message
                 const successMessage = document.createElement('div');
                 successMessage.innerHTML = `
@@ -83,8 +104,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => {
                     successMessage.remove();
                 }, 5000);
+            })
+            .catch(error => {
+                console.error('Signup error:', error);
                 
-            }, 1500);
+                // Show error message
+                const errorMessage = document.createElement('div');
+                errorMessage.innerHTML = `
+                    <div style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-top: 1rem; text-align: center;">
+                        <strong>Signup failed</strong><br>
+                        ${error.message || 'Please try again later.'}
+                    </div>
+                `;
+                
+                signupForm.appendChild(errorMessage);
+                
+                // Reset button
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+                
+                // Remove error message after 5 seconds
+                setTimeout(() => {
+                    errorMessage.remove();
+                }, 5000);
+            });
         });
     }
 
