@@ -77,8 +77,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify(memberData)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                return response.json();
+            })
             .then(data => {
+                console.log('Response data:', data);
                 if (data.error) {
                     throw new Error(data.error);
                 }
