@@ -664,33 +664,6 @@
                     showError('Error updating member');
                 }
             };
-
-            try {
-                const response = await fetch(`${API_BASE}/api/members/${memberId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        firstName: newFirstName,
-                        lastName: newLastName,
-                        email: newEmail,
-                        postcode: newPostcode,
-                        phone: newPhone || null,
-                        newsletterOptIn: newsletterOptIn
-                    })
-                });
-
-                if (response.ok) {
-                    alert('Member updated successfully!');
-                    fetchMembers(); // Refresh the list
-                } else {
-                    showError('Failed to update member');
-                }
-            } catch (error) {
-                console.error('Error updating member:', error);
-                alert('Error updating member');
-            }
         }
 
         async function toggleStatus(memberId, currentStatus) {
